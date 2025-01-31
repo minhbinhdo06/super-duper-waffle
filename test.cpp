@@ -71,7 +71,7 @@ const ll lloo = 1e18 + 7;
  
 typedef pair<int, int> ii;
 typedef vector<int> vi;
-typedef vector<pair<int, int>> pii;
+typedef vector<pair<int, int> > pii;
  
 int n, m;
 vi g[maxn];
