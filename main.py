@@ -10,13 +10,11 @@ def main():
     idx += 1
     matrix = []
     for _ in range(N):
-        row = list(map(int, input[idx:idx+M]))
+        row = list(map(int, input[idx:idx+M]))  
         idx += M
         matrix.append(row)
-    
     visited = [[False for _ in range(M)] for _ in range(N)]
-    count = 0
-    
+    count = 0           
     for i in range(N):
         for j in range(M):
             if not visited[i][j]:
