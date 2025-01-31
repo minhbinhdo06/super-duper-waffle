@@ -1,127 +1,93 @@
-/*
-      Author: MinhBinhDo
-      Created: 06:16 29.09.2023
-*/
- 
-#include <algorithm>
-#include <bitset>
-#include <complex>
-#include <deque>
-#include <exception>
-#include <fstream>
-#include <functional>
-#include <iomanip>
-#include <ios>
-#include <iosfwd>
 #include <iostream>
-#include <istream>
-#include <iterator>
-#include <limits>
-#include <list>
-#include <locale>
-#include <map>
-#include <memory>
-#include <new>
-#include <numeric>
-#include <ostream>
-#include <queue>
-#include <set>
-#include <sstream>
-#include <stack>
-#include <stdexcept>
-#include <streambuf>
-#include <string>
-#include <typeinfo>
-#include <utility>
-#include <valarray>
 #include <vector>
-
-#if __cplusplus >= 201103L
-#include <array>
-#include <atomic>
-#include <chrono>
-#include <condition_variable>
-#include <forward_list>
-#include <future>
-#include <initializer_list>
-#include <mutex>
-#include <random>
-#include <ratio>
-#include <regex>
-#include <scoped_allocator>
-#include <system_error>
-#include <thread>
-#include <tuple>
-#include <typeindex>
-#include <type_traits>
-#include <unordered_map>
+#include <queue>
 #include <unordered_set>
-#endif
- 
+
 using namespace std;
- 
-#define maxn 10007
-#define ll long long
-#define pb push_back
-#define fr first
-#define sc second
- 
-const int oo = 1e9 + 7;
-const ll lloo = 1e18 + 7;
- 
-typedef pair<int, int> ii;
-typedef vector<int> vi;
-typedef vector<pair<int, int> > pii;
- 
-int n, m;
-vi g[maxn];
-int low[maxn], num[maxn], timeDfs;
-bool deleted[maxn];
-int scc; 
-stack<int> st;
 
-void dfs(int u)
-{
-    num[u] = low[u] = ++timeDfs;
-    st.push(u);
-    for(int v : g[u])
-    {
-        if(deleted[v]) continue;
-        if(!num[v])
-        {
-            dfs(v);
-            low[u] = min(low[u], low[v]);
-        }
-        else low[u] = min(low[u], num[v]);
-    }
-    if(low[u] == num[u])
-    {
-        scc++;
-        int v;
-        do
-        {
-            v = st.top();
-            st.pop();
-            deleted[v] = true;
-        } while (v != u);
-        
-    }
-} 
-
-int32_t main()
-{
+int main() {
     ios_base::sync_with_stdio(false);
-    cin.tie(nullptr); cout.tie(nullptr);
-    cin >> n >> m;
-    for(int i = 1; i <= m; i++)
-    {
-        int u, v; cin >> u >> v;
-        g[u].pb(v);
+    cin.tie(nullptr);
+
+    int N, M;
+    cin >> N >> M;
+
+    vector<vector<int> > grid(N, vector<int>(M));
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < M; ++j) {
+            cin >> grid[i][j];
+        }
     }
-    for(int i = 1; i <= n; i++)
-    {
-        if(!num[i]) dfs(i);
+
+    vector<vector<bool> > visited(N, vector<bool>(M, false));
+    int peak_count = 0;
+
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < M; ++j) {
+            if (visited[i][j]) continue;
+
+            queue<pair<int, int> > q;
+            q.push({i, j});
+            visited[i][j] = true;
+            vector<pair<int, int> > cells;
+            cells.push_back({i, j});
+            unordered_set<int> current_region;
+            current_region.insert(i * M + j);
+            int H = grid[i][j];
+
+            // BFS to find all cells in the current region
+            while (!q.empty()) {
+                auto [x, y] = q.front();
+                q.pop();
+
+                for (int dx = -1; dx <= 1; ++dx) {
+                    for (int dy = -1; dy <= 1; ++dy) {
+                        if (dx == 0 && dy == 0) continue;
+
+                        int nx = x + dx;
+                        int ny = y + dy;
+
+                        if (nx >= 0 && nx < N && ny >= 0 && ny < M) {
+                            if (!visited[nx][ny] && grid[nx][ny] == H) {
+                                visited[nx][ny] = true;
+                                q.push({nx, ny});
+                                cells.push_back({nx, ny});
+                                current_region.insert(nx * M + ny);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Check if the region is a peak
+            bool valid = true;
+            for (auto [x, y] : cells) {
+                for (int dx = -1; dx <= 1; ++dx) {
+                    for (int dy = -1; dy <= 1; ++dy) {
+                        if (dx == 0 && dy == 0) continue;
+
+                        int nx = x + dx;
+                        int ny = y + dy;
+
+                        if (nx < 0 || nx >= N || ny < 0 || ny >= M) continue;
+
+                        int key = nx * M + ny;
+                        if (current_region.count(key)) continue;
+
+                        if (grid[nx][ny] >= H) {
+                            valid = false;
+                            goto end_check;
+                        }
+                    }
+                }
+            }
+
+            end_check:
+            if (valid) {
+                peak_count++;
+            }
+        }
     }
-    cout << scc;
+    cout << peak_count << endl;
     return 0;
 }
